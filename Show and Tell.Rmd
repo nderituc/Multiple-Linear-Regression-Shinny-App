@@ -1,0 +1,261 @@
+# Portfolio Goal Setting:
+
+For my portfolio, I have chosen to create an interactive applet that explains a supervised statistical learning method using real-world data. The applet focuses on linear regression, one of the foundational concepts of statistical modeling. It allows users to upload their own dataset or use a pre-loaded dataset to visualize how linear regression works. Users can interactively adjust the model parameters, see the corresponding changes in the fitted line, and explore the statistical measures like R-squared and residual plots. This applet was developed using the R programming language and the Shiny package.
+
+# Course Objectives
+
+## **Objective 1 :** Describe probability as a foundation of statistical modeling, including inference and maximum likelihood estimation
+
+The provided example demonstrates the application of a linear regression model to predict car miles per gallon (mpg) based on predictor variables such as car weight (wt), horsepower (hp), and quarter-mile time (qsec) using the 'mtcars' dataset. The model is fitted using maximum likelihood estimation (MLE), which leverages probability to quantify uncertainty and estimate model parameters that best explain the observed data. Probability serves as the foundation for statistical modeling, enabling us to understand uncertainty and make predictions based on data.
+
+```{r}
+# Load necessary libraries
+library(stats)
+library(GGally)
+library(tidyverse)
+library(tidymodels)
+#plots to check the relationship between response and predictor variables
+mtcars %>% 
+  select(mpg,wt,hp,qsec,cyl,disp,drat) %>% 
+  ggpairs()
+```
+
+In this example the important predictor variable for mpg is wt with a pvalue \<0.05.As wt increases the mpg decreases.One unit increase in wt leads to 4.38 decrease in mpg. The model becomes mpg = 16.53 - 4.38 (wt). The model estimates are the maximum likelihood estimators of the multiple linear regression coefficients
+
+```{r}
+# Created a parsnip specification for a linear model
+lm_spec <- linear_reg() %>%
+set_mode("regression") %>%
+set_engine("lm")
+
+lm_spec
+# Fit our specification to our data
+#To check which predictor variables are associated with the response
+#We use the linearly related predictor variables 
+mlr_mod <- lm_spec %>% 
+fit(mpg ~ wt+hp+qsec+disp+drat, data = mtcars)
+# View our model output
+tidy(mlr_mod)
+
+```
+
+To assess our model fit, we can use $R^2$ (the coefficient of determination), the proportion of variability in the response variable that is explained by the explanatory variable.With R-squared of 0.84 it means that, approximately 84% of the variability in the dependent variable mpg can be explained by the independent variables wt
+
+```{r}
+glance(mlr_mod)
+```
+
+
+## **Objective 2 :** Determine and apply the appropriate generalized linear model for a specific data context
+
+### Logistic Regresion GLM
+The example demonstrates the application of a generalized linear model (logistic regression) using the Titanic dataset. It prepares the data by converting the outcome variable to binary, splits the data into training and testing sets, and fits the logistic regression model using the glm function with the 'binomial' family to handle binary outcome variables. The model is evaluated using a Receiver Operating Characteristic (ROC) curve and the Area Under the Curve (AUC) value. The logistic regression model predicts survival outcomes based on predictor variables such as 'Class', 'Age', and 'Sex'.
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+
+# Load Titanic dataset
+data(Titanic)
+
+```
+
+To Prepare the data for logistic regression.Convert the "Survived" variable (1 for survived, 0 for not survived) into a binary outcome variable.
+
+```{r}
+# Convert the 'Survived' column to a binary outcome variable
+Titanic <- as.data.frame(Titanic)  # Convert the array to a dataframe
+Titanic <- Titanic %>%
+  mutate(Survived = ifelse(Survived == "No", 0, 1))  # Convert "No" to 0 and "Yes" to 1
+
+
+```
+
+I split the data in training and testing set to evaluate the model's performance on unseen data.
+
+```{r}
+# Install and load 'caTools' package for data splitting
+library(caTools)
+
+# Split data into training (80%) and testing (20%) sets
+set.seed(42)
+split <- sample.split(Titanic$Survived, SplitRatio = 0.8)
+train_data <- subset(Titanic, split == TRUE)
+test_data <- subset(Titanic, split == FALSE)
+
+```
+
+I used the glm() function in R to fit the logistic regression model to the data.I used "Survived" as the binary outcome variable and "Class" (passenger class), "Age," and "Sex" as the predictor variables. The family argument is set to binomial to specify logistic regression.
+
+```{r}
+# Fit the logistic regression model using 'glm()'
+model <- glm(Survived ~ Class + Age + Sex, data = train_data, family = binomial)
+summary(model)
+
+```
+
+I evaluated the model's performance using ROC curve and AUC on the testing set.With an AUC of 1, the model's performance is perfect and has a discriminative power that separates the positive and negative classes completely. In other words, the model can perfectly distinguish between the positive and negative cases, making correct predictions for all instances.
+
+```{r}
+# Install and load 'pROC' package for ROC curve and AUC
+library(pROC)
+
+# Make predictions on the testing set
+predictions <- predict(model, newdata = test_data, type = "response")
+predictions
+
+# Create a ROC curve and calculate AUC
+roc_curve <- roc(test_data$Survived, predictions)
+auc_value <- auc(roc_curve)
+plot(roc_curve, main = paste("ROC Curve (AUC =", auc_value, ")"))
+
+```
+
+
+
+## **Objective3 :** Conduct model selection for a set of candidate models
+
+### Forward stepwise selection
+The provided example demonstrates how to perform model selection using forward stepwise regression. It starts with an intercept-only model and incrementally adds predictors based on the Akaike Information Criterion (AIC). The goal is to identify the best-fitted model that optimizes the trade-off between predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their corresponding coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
+```{r}
+#define intercept-only model
+intercept_only <- lm(mpg ~ 1, data=mtcars)
+
+#define model with all predictors
+all <- lm(mpg ~ ., data=mtcars)
+
+#perform forward stepwise regression
+forward <- step(intercept_only, direction='forward', scope=formula(all), trace=0)
+
+#view results of forward stepwise regression
+forward$anova
+#view final model
+forward$coefficients
+
+```
+
+### Backward stepwise selection
+The provided example demonstrates model selection using backward stepwise regression. It starts with a model containing all predictors and iteratively removes the least significant predictor based on the Akaike Information Criterion (AIC). The objective is to find the best-fitted model that balances predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
+```{r}
+#define intercept-only model
+intercept_only <- lm(mpg ~ 1, data=mtcars)
+
+#define model with all predictors
+all <- lm(mpg ~ ., data=mtcars)
+
+#perform backward stepwise regression
+backward <- step(all, direction='backward', scope=formula(all), trace=0)
+
+#view results of backward stepwise regression
+backward$anova
+
+#view final model
+backward$coefficients
+
+
+```
+
+### Both direction stepwise selection
+The provided example demonstrates model selection using stepwise regression with both forward and backward steps. It starts with an intercept-only model and iteratively adds or removes predictors based on the Akaike Information Criterion (AIC) to find the best-fitted model. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable. This approach allows for a comprehensive search for the optimal set of predictors while considering both increasing and decreasing model complexity.
+```{r}
+#define intercept-only model
+intercept_only <- lm(mpg ~ 1, data=mtcars)
+
+#define model with all predictors
+all <- lm(mpg ~ ., data=mtcars)
+
+#perform backward stepwise regression
+both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
+
+#view results of backward stepwise regression
+both$anova
+
+#view final model
+both$coefficients
+
+```
+
+
+
+### Model selection by principal component regression
+
+The provided example demonstrates how to perform model selection using Principal Component Regression (PCR) with cross-validation. The main steps involved are as follows:
+
+Loading the "mtcars" dataset and exploring its structure.
+Fitting a PCR model using the pcr function with the validation = "CV" argument to enable cross-validation during the model training.
+Visualizing cross-validation plots to analyze the model's performance in terms of mean squared error (MSEP) and R-squared.
+Splitting the dataset into training and testing sets.
+Refitting the PCR model using the training set and making predictions on the testing set.
+Calculating the Root Mean Squared Error (RMSE) to evaluate the model's predictive performance on the testing set.
+By performing cross-validation and analyzing the validation plots, the example helps to select an appropriate number of principal components (ncomp) that optimizes the model's predictive performance. This process aids in model selection by finding the most suitable model complexity for the given dataset.
+
+```{r}
+library(pls)
+
+```
+
+```{r}
+# Load the "mtcars" dataset (already available in R)
+data(mtcars)
+
+# Explore the dataset
+head(mtcars)
+#make this example reproducible
+set.seed(42)
+
+#fit PCR model
+model <- pcr(hp~mpg+disp+drat+wt+qsec, data=mtcars, scale=TRUE, validation="CV")
+summary(model)
+
+```
+
+```{r}
+#visualize cross-validation plots
+validationplot(model)
+validationplot(model, val.type="MSEP")
+validationplot(model, val.type="R2")
+
+
+```
+
+
+```{r}
+#define training and testing sets
+train <- mtcars[1:25, c("hp", "mpg", "disp", "drat", "wt", "qsec")]
+y_test <- mtcars[26:nrow(mtcars), c("hp")]
+test <- mtcars[26:nrow(mtcars), c("mpg", "disp", "drat", "wt", "qsec")]
+    
+#use model to make predictions on a test set
+model <- pcr(hp~mpg+disp+drat+wt+qsec, data=train, scale=TRUE, validation="CV")
+pcr_pred <- predict(model, test, ncomp=2)
+
+#calculate RMSE
+sqrt(mean((pcr_pred - y_test)^2))
+
+```
+
+
+
+## **Objective 4 :** Communicate the results of statistical models to a general audience
+
+The applet is designed to be user-friendly and accessible to a general audience. It provides clear visualizations, easy-to-understand sliders for model parameters, and interactive components that engage users in the learning process. By being intuitive and informative, the applet effectively communicates the concepts of linear regression and its results to a broader audience.
+
+## **Objective 5 :** Use programming software (i.e., R) to fit and assess statistical models
+
+This applet is entirely built using R and the Shiny package. It showcases my proficiency in using R for fitting and assessing statistical models. The applet employs various R packages for data manipulation, model fitting, and visualization. Additionally, the applet demonstrates my ability to present statistical concepts in an interactive and engaging way using R programming.
+
+# Reflection and Learning growth
+
+Reflection on Learning and Growth: Throughout the semester, I have gained a deeper understanding of probability and its essential role in statistical modeling. I initially struggled with grasping the concept of maximum likelihood estimation, but through practice, in-class activities, and discussions with peers, I now feel much more confident in this area. Additionally, I have developed a solid grasp of generalized linear models and their applications in different data contexts.
+
+I found model selection to be challenging, as it required balancing between simplicity and accuracy in the models. However, participating in class activities and mini-competitions helped me develop a systematic approach to model selection and identify the trade-offs involved.
+
+Regarding communication, I have made an effort to improve my ability to present complex statistical concepts to a general audience effectively. The interactive applet I created for this portfolio is a testament to that growth. I learned how to simplify complex ideas and create engaging visualizations to facilitate understanding.
+
+As for using programming software, I came into the course with some experience in R, but I am delighted with how much I've learned and utilized R to fit, assess, and visualize various statistical models.
+
+Reflection on Active Participation in the Course Community: Throughout the semester, I actively participated in the course community by regularly attending class, actively engaging in team discussions, and contributing to online forums. I enjoyed collaborating with my peers on mini-competitions and in-class activities, as it provided an opportunity to learn from different perspectives and approaches.
+
+To foster a supportive community, I made an effort to be responsive to my peers' questions and encouraged collaboration within our teams. I also shared resources and helpful materials whenever I came across them, which contributed to a positive learning environment.
+
+Overall, this course has been a journey of growth and self-discovery. I am grateful for the supportive community and the opportunity to apply my knowledge to real-world data through various projects and competitions. I feel much more confident in my statistical modeling abilities and look forward to applying these skills in future endeavors.
