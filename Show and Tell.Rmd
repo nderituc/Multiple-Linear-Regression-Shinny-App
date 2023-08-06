@@ -45,10 +45,10 @@ To assess our model fit, we can use $R^2$ (the coefficient of determination), th
 glance(mlr_mod)
 ```
 
-
 ## **Objective 2 :** Determine and apply the appropriate generalized linear model for a specific data context
 
 ### Logistic Regresion GLM
+
 The example demonstrates the application of a generalized linear model (logistic regression) using the Titanic dataset. It prepares the data by converting the outcome variable to binary, splits the data into training and testing sets, and fits the logistic regression model using the glm function with the 'binomial' family to handle binary outcome variables. The model is evaluated using a Receiver Operating Characteristic (ROC) curve and the Area Under the Curve (AUC) value. The logistic regression model predicts survival outcomes based on predictor variables such as 'Class', 'Age', and 'Sex'.
 
 ```{r}
@@ -111,12 +111,12 @@ plot(roc_curve, main = paste("ROC Curve (AUC =", auc_value, ")"))
 
 ```
 
-
-
 ## **Objective3 :** Conduct model selection for a set of candidate models
 
 ### Forward stepwise selection
+
 The provided example demonstrates how to perform model selection using forward stepwise regression. It starts with an intercept-only model and incrementally adds predictors based on the Akaike Information Criterion (AIC). The goal is to identify the best-fitted model that optimizes the trade-off between predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their corresponding coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
+
 ```{r}
 #define intercept-only model
 intercept_only <- lm(mpg ~ 1, data=mtcars)
@@ -135,7 +135,9 @@ forward$coefficients
 ```
 
 ### Backward stepwise selection
+
 The provided example demonstrates model selection using backward stepwise regression. It starts with a model containing all predictors and iteratively removes the least significant predictor based on the Akaike Information Criterion (AIC). The objective is to find the best-fitted model that balances predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
+
 ```{r}
 #define intercept-only model
 intercept_only <- lm(mpg ~ 1, data=mtcars)
@@ -156,7 +158,9 @@ backward$coefficients
 ```
 
 ### Both direction stepwise selection
+
 The provided example demonstrates model selection using stepwise regression with both forward and backward steps. It starts with an intercept-only model and iteratively adds or removes predictors based on the Akaike Information Criterion (AIC) to find the best-fitted model. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable. This approach allows for a comprehensive search for the optimal set of predictors while considering both increasing and decreasing model complexity.
+
 ```{r}
 #define intercept-only model
 intercept_only <- lm(mpg ~ 1, data=mtcars)
@@ -175,19 +179,11 @@ both$coefficients
 
 ```
 
-
-
 ### Model selection by principal component regression
 
 The provided example demonstrates how to perform model selection using Principal Component Regression (PCR) with cross-validation. The main steps involved are as follows:
 
-Loading the "mtcars" dataset and exploring its structure.
-Fitting a PCR model using the pcr function with the validation = "CV" argument to enable cross-validation during the model training.
-Visualizing cross-validation plots to analyze the model's performance in terms of mean squared error (MSEP) and R-squared.
-Splitting the dataset into training and testing sets.
-Refitting the PCR model using the training set and making predictions on the testing set.
-Calculating the Root Mean Squared Error (RMSE) to evaluate the model's predictive performance on the testing set.
-By performing cross-validation and analyzing the validation plots, the example helps to select an appropriate number of principal components (ncomp) that optimizes the model's predictive performance. This process aids in model selection by finding the most suitable model complexity for the given dataset.
+Loading the "mtcars" dataset and exploring its structure. Fitting a PCR model using the pcr function with the validation = "CV" argument to enable cross-validation during the model training. Visualizing cross-validation plots to analyze the model's performance in terms of mean squared error (MSEP) and R-squared. Splitting the dataset into training and testing sets. Refitting the PCR model using the training set and making predictions on the testing set. Calculating the Root Mean Squared Error (RMSE) to evaluate the model's predictive performance on the testing set. By performing cross-validation and analyzing the validation plots, the example helps to select an appropriate number of principal components (ncomp) that optimizes the model's predictive performance. This process aids in model selection by finding the most suitable model complexity for the given dataset.
 
 ```{r}
 library(pls)
@@ -218,7 +214,6 @@ validationplot(model, val.type="R2")
 
 ```
 
-
 ```{r}
 #define training and testing sets
 train <- mtcars[1:25, c("hp", "mpg", "disp", "drat", "wt", "qsec")]
@@ -233,8 +228,6 @@ pcr_pred <- predict(model, test, ncomp=2)
 sqrt(mean((pcr_pred - y_test)^2))
 
 ```
-
-
 
 ## **Objective 4 :** Communicate the results of statistical models to a general audience
 
