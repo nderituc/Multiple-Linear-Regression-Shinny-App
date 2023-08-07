@@ -56,6 +56,7 @@ After that, it fits a multiple logistic regression model using the "glm" functio
 Next, the code creates two plots to assess the model's fit. The first plot shows the deviance residuals against the fitted values, helping us visualize the distribution of residuals and identify any patterns or trends. The second plot displays the deviance residuals against the row numbers, allowing us to detect potential outliers or influential observations.
 
 Overall, this code provides a comprehensive analysis of the logistic regression model a member of generalized linear models, from fitting the model to evaluating its fit using residual plots. It helps understand how the predictor variables contribute to the likelihood of default in the "Default" dataset.
+
 ```{r}
 # Load necessary libraries
 library(ISLR2)       # For accessing the "Default" dataset
@@ -106,11 +107,12 @@ labs(x = "id",
 
 ```
 
-
 ## **Objective3 :** Conduct model selection for a set of candidate models
 
 ### Subset selection method
+
 This example below performs best subsets regression on the "mtcars" dataset to find the best model with the optimal number of predictor variables. It explores different metrics, such as R-squared, Adjusted R-squared, Cp, and BIC, to evaluate the performance of models with varying numbers of predictors. The code generates plots to visualize the relationships between these metrics and the number of variables in the model. Ultimately, it identifies the model with the highest Adjusted R-squared and the model with the minimum Cp and BIC values. Additionally, it retrieves the coefficients of the model with 6 variables, providing insights into the significant predictors for that model.
+
 ```{r}
 # Load required libraries
 library(ISLR2)
@@ -174,9 +176,8 @@ plot (reg.summary$adjr2 , xlab = " Number of Variables ",
 ylab = " Adjusted RSq ", type = "l")
 ```
 
-
-
 ### Forward and backward selection
+
 This following example performs forward stepwise regression and backward stepwise regression using best subsets on the "mtcars" dataset with the response variable "mpg" and predictor variables from the dataset. The regsubsets function from the "leaps" package is used to perform the best subsets regression.
 
 After fitting the forward and backward stepwise regression models, the code then uses the summary function to view the results, which include information about the selected variables and their coefficients for each model with different numbers of variables (up to 19).
@@ -184,6 +185,7 @@ After fitting the forward and backward stepwise regression models, the code then
 Finally, the code retrieves the coefficients of the model with 7 variables from the full model, the forward stepwise model, and the backward stepwise model, respectively.
 
 In summary, this code conducts model selection by exploring different combinations of predictor variables and provides insights into the best models with a specific number of variables, helping to identify the most relevant predictors for explaining the variation in the "mpg" response variable.
+
 ```{r}
 # Perform forward stepwise regression using best subsets
 regfit.fwd <- regsubsets(mpg ~ ., data = mtcars, nvmax = 19, method = "forward")
