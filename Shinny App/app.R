@@ -4,6 +4,7 @@ library(dplyr)
 library(parsnip)
 library(broom)
 library(GGally)
+library(plotly)
 
 ui <- fluidPage(
   titlePanel("Multiple Linear Regression App"),
@@ -35,6 +36,22 @@ ui <- fluidPage(
         tabPanel("Scatterplot Matrix",
                  h3("Scatterplot Matrix"),
                  plotOutput("scatterplot_matrix")
+        ),
+        tabPanel("Residuals vs. Fitted",
+                 h3("Residuals vs. Fitted"),
+                 plotOutput("residuals_vs_fitted")
+        ),
+        tabPanel("Normal Q-Q Plot",
+                 h3("Normal Q-Q Plot"),
+                 plotOutput("normal_qq_plot")
+        ),
+        tabPanel("Scale-Location Plot",
+                 h3("Scale-Location Plot"),
+                 plotOutput("scale_location_plot")
+        ),
+        tabPanel("Residuals vs. Leverage",
+                 h3("Residuals vs. Leverage"),
+                 plotlyOutput("residuals_vs_leverage")
         )
       )
     )
@@ -175,9 +192,147 @@ server <- function(input, output, session) {
     
     ggpairs(data, title = "Scatterplot Matrix")
   })
+  output$residuals_vs_fitted <- renderPlot({
+    data <- data_reactive()
+    response_var <- input$response_var
+    predictor_vars <- input$predictor_vars
+    
+    if (is.null(data) || is.null(response_var) || length(predictor_vars) == 0)
+      return(NULL)
+    
+    formula <- reformulate(predictor_vars, response_var)
+    
+    lm_spec <- linear_reg() %>% 
+      set_mode("regression") %>%
+      set_engine("lm")
+    
+    mlr_mod <- lm_spec %>% 
+      fit(formula, data = data)
+    
+    # Remove rows with missing values
+    data <- na.omit(data)
+    
+    # Get residuals
+    residuals <- residuals(mlr_mod)
+    
+    # Calculate the variance of residuals at different levels of predictor variables
+    variance_data <- data %>%
+      group_by_at(vars(predictor_vars)) %>%
+      summarise(Variance_Residuals = var(residuals))
+    # Create a plot of variance of residuals against predictor variables
+    p <- ggplot(variance_data, aes(x = !!sym(predictor_vars), y = Variance_Residuals)) +
+      geom_point() +
+      geom_line() +
+      labs(title = "Variance of Residuals vs. Predictor Variable(s)",
+           x = paste("Predictor Variable(s):", paste(predictor_vars, collapse = ",")),
+           y = "Variance of Residuals")
+    
+    # Convert ggplot to plotly
+    ggplotly(p)
+    
+  })
+  
+  output$normal_qq_plot <- renderPlot({
+    data <- data_reactive()
+    response_var <- input$response_var
+    predictor_vars <- input$predictor_vars
+    
+    if (is.null(data) || is.null(response_var) || length(predictor_vars) == 0)
+      return(NULL)
+    
+    formula <- reformulate(predictor_vars, response_var)
+    
+    lm_spec <- linear_reg() %>% 
+      set_mode("regression") %>%
+      set_engine("lm")
+    
+    mlr_mod <- lm_spec %>% 
+      fit(formula, data = data)
+    
+    fitted_model <- extract_fit_engine(mlr_mod)
+    
+    # Extract residuals
+    residuals <- residuals(fitted_model)
+    
+    # Create normal Q-Q plot
+    ggplot(data.frame(Standardized_Residuals = scale(residuals)), aes(sample = Standardized_Residuals)) +
+      geom_qq() +
+      geom_qq_line() +
+      labs(title = "Normal Q-Q Plot",
+           x = "Theoretical Quantiles",
+           y = "Standardized Residuals")
+  })
+  
+  output$scale_location_plot <- renderPlot({
+    data <- data_reactive()
+    response_var <- input$response_var
+    predictor_vars <- input$predictor_vars
+    
+    if (is.null(data) || is.null(response_var) || length(predictor_vars) == 0)
+      return(NULL)
+    
+    formula <- reformulate(predictor_vars, response_var)
+    
+    lm_spec <- linear_reg() %>% 
+      set_mode("regression") %>%
+      set_engine("lm")
+    
+    mlr_mod <- lm_spec %>% 
+      fit(formula, data = data)
+    
+    fitted_model <- extract_fit_engine(mlr_mod)
+    
+    # Extract standardized residuals
+    standardized_residuals <- rstandard(fitted_model)
+    
+    ggplot(data.frame(Fitted_Values = fitted(fitted_model), Standardized_Residuals = standardized_residuals), aes(x = Fitted_Values, y = sqrt(abs(Standardized_Residuals)))) +
+      geom_point() +
+      geom_smooth(method = "loess", se = FALSE, color = "red") +
+      labs(title = "Scale-Location Plot",
+           x = "Fitted Values",
+           y = "√|Standardized Residuals|")
+  })
+  
+  output$residuals_vs_leverage <- renderPlot({
+    data <- data_reactive()
+    response_var <- input$response_var
+    predictor_vars <- input$predictor_vars
+    
+    if (is.null(data) || is.null(response_var) || length(predictor_vars) == 0)
+      return(NULL)
+    
+    formula <- reformulate(predictor_vars, response_var)
+    
+    lm_spec <- linear_reg() %>% 
+      set_mode("regression") %>%
+      set_engine("lm")
+    
+    mlr_mod <- lm_spec %>% 
+      fit(formula, data = data)
+    
+    # Calculate residuals and leverage values
+    fitted_model <- extract_fit_engine(mlr_mod)
+    residuals <- residuals(fitted_model)
+    leverage_values <- hatvalues(fitted_model)
+    
+    # Calculate standardized residuals
+    standardized_residuals <- residuals / sqrt(1 - leverage_values)
+    
+    ggplot(data.frame(Leverage = leverage_values, Standardized_Residuals = standardized_residuals), aes(x = Leverage, y = Standardized_Residuals)) +
+      geom_point() +
+      geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+      geom_vline(xintercept = 2*mean(leverage_values), linetype = "dotted", color = "blue") +
+      geom_vline(xintercept = 3*mean(leverage_values), linetype = "dotted", color = "blue") +
+      labs(title = "Residuals vs. Leverage",
+           x = "Leverage",
+           y = "Standardized Residuals")
+  
+   
+  })
 }
 
 shinyApp(ui = ui, server = server)
+
 
 
 
