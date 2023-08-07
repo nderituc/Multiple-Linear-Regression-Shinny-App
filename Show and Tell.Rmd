@@ -49,183 +49,162 @@ glance(mlr_mod)
 
 ### Logistic Regresion GLM
 
-The example demonstrates the application of a generalized linear model (logistic regression) using the Titanic dataset. It prepares the data by converting the outcome variable to binary, splits the data into training and testing sets, and fits the logistic regression model using the glm function with the 'binomial' family to handle binary outcome variables. The model is evaluated using a Receiver Operating Characteristic (ROC) curve and the Area Under the Curve (AUC) value. The logistic regression model predicts survival outcomes based on predictor variables such as 'Class', 'Age', and 'Sex'.
+This example uses the "Default" dataset to perform a logistic regression analysis. The objective is to predict the likelihood of default (binary outcome) based on the predictor variables: "student," "balance," and "income." The code first loads the necessary libraries and displays a summary of the dataset.
 
+After that, it fits a multiple logistic regression model using the "glm" function from the "tidyverse" package. The results are then presented, showing the coefficients and their statistics. To make the interpretation easier, the exponentiated coefficients are also displayed.
+
+Next, the code creates two plots to assess the model's fit. The first plot shows the deviance residuals against the fitted values, helping us visualize the distribution of residuals and identify any patterns or trends. The second plot displays the deviance residuals against the row numbers, allowing us to detect potential outliers or influential observations.
+
+Overall, this code provides a comprehensive analysis of the logistic regression model a member of generalized linear models, from fitting the model to evaluating its fit using residual plots. It helps understand how the predictor variables contribute to the likelihood of default in the "Default" dataset.
 ```{r}
 # Load necessary libraries
-library(dplyr)
+library(ISLR2)       # For accessing the "Default" dataset
+library(tidyverse)   # For data manipulation and visualization
+library(tidymodels)  # For building generalized linear models
 
-# Load Titanic dataset
-data(Titanic)
+# Load the "Default" dataset
+data <- ISLR2::Default
 
-```
+# View summary of the dataset
+summary(data)
 
-To Prepare the data for logistic regression.Convert the "Survived" variable (1 for survived, 0 for not survived) into a binary outcome variable.
+# Find the total number of observations in the dataset
+nrow(data)
 
-```{r}
-# Convert the 'Survived' column to a binary outcome variable
-Titanic <- as.data.frame(Titanic)  # Convert the array to a dataframe
-Titanic <- Titanic %>%
-  mutate(Survived = ifelse(Survived == "No", 0, 1))  # Convert "No" to 0 and "Yes" to 1
+# Fit the multiple logistic regression model
+mult_log_mod <- glm(default ~ student + balance + income, data = data, family = "binomial")
 
+# Display the coefficients and their statistics
+tidy(mult_log_mod)
 
-```
+# Display the exponentiated coefficients for interpretation
+tidy(mult_log_mod, exponentiate = TRUE) %>% 
+  knitr::kable(digits = 3)
 
-I split the data in training and testing set to evaluate the model's performance on unseen data.
+# To store residuals and create a row number variable
+mult_log_aug <- augment(mult_log_mod, type.predict = "response", 
+                        type.residuals = "deviance") %>% 
+                        mutate(id = row_number())
 
-```{r}
-# Install and load 'caTools' package for data splitting
-library(caTools)
+# Assess model fit
 
-# Split data into training (80%) and testing (20%) sets
-set.seed(42)
-split <- sample.split(Titanic$Survived, SplitRatio = 0.8)
-train_data <- subset(Titanic, split == TRUE)
-test_data <- subset(Titanic, split == FALSE)
+# Plot residuals vs fitted values
+ggplot(data = mult_log_aug, aes(x = .fitted, y = .resid)) + 
+geom_point() + 
+geom_hline(yintercept = 0, color = "red") + 
+labs(x = "Fitted values", 
+     y = "Deviance residuals", 
+     title = "Deviance residuals vs. fitted")
 
-```
-
-I used the glm() function in R to fit the logistic regression model to the data.I used "Survived" as the binary outcome variable and "Class" (passenger class), "Age," and "Sex" as the predictor variables. The family argument is set to binomial to specify logistic regression.
-
-```{r}
-# Fit the logistic regression model using 'glm()'
-model <- glm(Survived ~ Class + Age + Sex, data = train_data, family = binomial)
-summary(model)
-
-```
-
-I evaluated the model's performance using ROC curve and AUC on the testing set.With an AUC of 1, the model's performance is perfect and has a discriminative power that separates the positive and negative classes completely. In other words, the model can perfectly distinguish between the positive and negative cases, making correct predictions for all instances.
-
-```{r}
-# Install and load 'pROC' package for ROC curve and AUC
-library(pROC)
-
-# Make predictions on the testing set
-predictions <- predict(model, newdata = test_data, type = "response")
-predictions
-
-# Create a ROC curve and calculate AUC
-roc_curve <- roc(test_data$Survived, predictions)
-auc_value <- auc(roc_curve)
-plot(roc_curve, main = paste("ROC Curve (AUC =", auc_value, ")"))
+# Plot residuals vs row number
+ggplot(data = mult_log_aug, aes(x = id, y = .resid)) + 
+geom_point() + 
+geom_hline(yintercept = 0, color = "red") + 
+labs(x = "id", 
+     y = "Deviance residuals", 
+     title = "Deviance residuals vs. id")
 
 ```
+
 
 ## **Objective3 :** Conduct model selection for a set of candidate models
 
-### Forward stepwise selection
-
-The provided example demonstrates how to perform model selection using forward stepwise regression. It starts with an intercept-only model and incrementally adds predictors based on the Akaike Information Criterion (AIC). The goal is to identify the best-fitted model that optimizes the trade-off between predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their corresponding coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
-
+### Subset selection method
+This example below performs best subsets regression on the "mtcars" dataset to find the best model with the optimal number of predictor variables. It explores different metrics, such as R-squared, Adjusted R-squared, Cp, and BIC, to evaluate the performance of models with varying numbers of predictors. The code generates plots to visualize the relationships between these metrics and the number of variables in the model. Ultimately, it identifies the model with the highest Adjusted R-squared and the model with the minimum Cp and BIC values. Additionally, it retrieves the coefficients of the model with 6 variables, providing insights into the significant predictors for that model.
 ```{r}
-#define intercept-only model
-intercept_only <- lm(mpg ~ 1, data=mtcars)
+# Load required libraries
+library(ISLR2)
+library(leaps)
 
-#define model with all predictors
-all <- lm(mpg ~ ., data=mtcars)
+# Check column names, dimensions, and missing values in mtcars dataset
+names(mtcars)
+dim(mtcars)
+sum(is.na(mtcars$mpg))
 
-#perform forward stepwise regression
-forward <- step(intercept_only, direction='forward', scope=formula(all), trace=0)
+# Perform best subsets regression with up to 19 variables
+regfit.full <- regsubsets(mpg ~ ., data = mtcars, nvmax = 19)
 
-#view results of forward stepwise regression
-forward$anova
-#view final model
-forward$coefficients
+# Summarize the results of the best subsets regression
+reg.summary <- summary(regfit.full)
 
-```
+# View the R-squared values for different models with varying number of variables
+reg.summary$rsq
 
-### Backward stepwise selection
+# Create a 2x2 plot to visualize the relationship between RSS and number of variables,
+# and between Adjusted R-squared and number of variables
+par(mfrow = c(2, 2))
+plot(reg.summary$rss, xlab = "Number of Variables", ylab = "RSS", type = "l")
+plot(reg.summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l")
 
-The provided example demonstrates model selection using backward stepwise regression. It starts with a model containing all predictors and iteratively removes the least significant predictor based on the Akaike Information Criterion (AIC). The objective is to find the best-fitted model that balances predictive performance and model complexity. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable.
+# Identify the index of the model with the highest Adjusted R-squared value and plot a red point
+# to mark the maximum value
+which.max(reg.summary$adjr2)
+points(11, reg.summary$adjr2[11], col = "red", cex = 2, pch = 20)
 
-```{r}
-#define intercept-only model
-intercept_only <- lm(mpg ~ 1, data=mtcars)
+# Create a plot to visualize the relationship between Cp and number of variables,
+# and identify the index of the model with the minimum Cp value and mark it with a red point
+plot(reg.summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l")
+which.min(reg.summary$cp)
+points(10, reg.summary$cp[10], col = "red", cex = 2, pch = 20)
 
-#define model with all predictors
-all <- lm(mpg ~ ., data=mtcars)
+# Identify the index of the model with the minimum BIC value and plot a red point
+# to mark the minimum value
+which.min(reg.summary$bic)
+plot(reg.summary$bic, xlab = "Number of Variables", ylab = "BIC", type = "l")
+points(6, reg.summary$bic[6], col = "red", cex = 2, pch = 20)
 
-#perform backward stepwise regression
-backward <- step(all, direction='backward', scope=formula(all), trace=0)
+# Create plots to visualize the relationship between R-squared, Adjusted R-squared, Cp, and BIC
+# for all models in the best subsets regression
+plot(regfit.full, scale = "r2")
+plot(regfit.full, scale = "adjr2")
+plot(regfit.full, scale = "Cp")
+plot(regfit.full, scale = "bic")
 
-#view results of backward stepwise regression
-backward$anova
-
-#view final model
-backward$coefficients
-
-
-```
-
-### Both direction stepwise selection
-
-The provided example demonstrates model selection using stepwise regression with both forward and backward steps. It starts with an intercept-only model and iteratively adds or removes predictors based on the Akaike Information Criterion (AIC) to find the best-fitted model. The final selected model contains the chosen subset of predictors and their coefficients, providing an interpretable representation of the relationship between the predictors and the response variable. This approach allows for a comprehensive search for the optimal set of predictors while considering both increasing and decreasing model complexity.
-
-```{r}
-#define intercept-only model
-intercept_only <- lm(mpg ~ 1, data=mtcars)
-
-#define model with all predictors
-all <- lm(mpg ~ ., data=mtcars)
-
-#perform backward stepwise regression
-both <- step(intercept_only, direction='both', scope=formula(all), trace=0)
-
-#view results of backward stepwise regression
-both$anova
-
-#view final model
-both$coefficients
-
-```
-
-### Model selection by principal component regression
-
-The provided example demonstrates how to perform model selection using Principal Component Regression (PCR) with cross-validation. The main steps involved are as follows:
-
-Loading the "mtcars" dataset and exploring its structure. Fitting a PCR model using the pcr function with the validation = "CV" argument to enable cross-validation during the model training. Visualizing cross-validation plots to analyze the model's performance in terms of mean squared error (MSEP) and R-squared. Splitting the dataset into training and testing sets. Refitting the PCR model using the training set and making predictions on the testing set. Calculating the Root Mean Squared Error (RMSE) to evaluate the model's predictive performance on the testing set. By performing cross-validation and analyzing the validation plots, the example helps to select an appropriate number of principal components (ncomp) that optimizes the model's predictive performance. This process aids in model selection by finding the most suitable model complexity for the given dataset.
-
-```{r}
-library(pls)
-
-```
-
-```{r}
-# Load the "mtcars" dataset (already available in R)
-data(mtcars)
-
-# Explore the dataset
-head(mtcars)
-#make this example reproducible
-set.seed(42)
-
-#fit PCR model
-model <- pcr(hp~mpg+disp+drat+wt+qsec, data=mtcars, scale=TRUE, validation="CV")
-summary(model)
-
-```
-
-```{r}
-#visualize cross-validation plots
-validationplot(model)
-validationplot(model, val.type="MSEP")
-validationplot(model, val.type="R2")
+# View the coefficients of the model with 6 variables
+coef(regfit.full, 6)
 
 
 ```
 
 ```{r}
-#define training and testing sets
-train <- mtcars[1:25, c("hp", "mpg", "disp", "drat", "wt", "qsec")]
-y_test <- mtcars[26:nrow(mtcars), c("hp")]
-test <- mtcars[26:nrow(mtcars), c("mpg", "disp", "drat", "wt", "qsec")]
-    
-#use model to make predictions on a test set
-model <- pcr(hp~mpg+disp+drat+wt+qsec, data=train, scale=TRUE, validation="CV")
-pcr_pred <- predict(model, test, ncomp=2)
+ par (mfrow = c(2, 2))
+plot (reg.summary$rss , xlab = " Number of Variables ",
+ylab = " RSS ", type = "l")
+plot (reg.summary$adjr2 , xlab = " Number of Variables ",
+ylab = " Adjusted RSq ", type = "l")
+```
 
-#calculate RMSE
-sqrt(mean((pcr_pred - y_test)^2))
+
+
+### Forward and backward selection
+This following example performs forward stepwise regression and backward stepwise regression using best subsets on the "mtcars" dataset with the response variable "mpg" and predictor variables from the dataset. The regsubsets function from the "leaps" package is used to perform the best subsets regression.
+
+After fitting the forward and backward stepwise regression models, the code then uses the summary function to view the results, which include information about the selected variables and their coefficients for each model with different numbers of variables (up to 19).
+
+Finally, the code retrieves the coefficients of the model with 7 variables from the full model, the forward stepwise model, and the backward stepwise model, respectively.
+
+In summary, this code conducts model selection by exploring different combinations of predictor variables and provides insights into the best models with a specific number of variables, helping to identify the most relevant predictors for explaining the variation in the "mpg" response variable.
+```{r}
+# Perform forward stepwise regression using best subsets
+regfit.fwd <- regsubsets(mpg ~ ., data = mtcars, nvmax = 19, method = "forward")
+
+# View summary of forward stepwise regression results
+summary(regfit.fwd)
+
+# Perform backward stepwise regression using best subsets
+regfit.bwd <- regsubsets(mpg ~ ., data = mtcars, nvmax = 19, method = "backward")
+
+# View summary of backward stepwise regression results
+summary(regfit.bwd)
+
+# Retrieve coefficients of the model with 7 variables from the full model
+coef(regfit.full, 7)
+
+# Retrieve coefficients of the model with 7 variables from the forward stepwise model
+coef(regfit.fwd, 7)
+
+# Retrieve coefficients of the model with 7 variables from the backward stepwise model
+coef(regfit.bwd, 7)
 
 ```
 
