@@ -1,4 +1,3 @@
-#Load the necessarly packages
 library(shiny)
 library(ggplot2)
 library(dplyr)
@@ -17,11 +16,21 @@ ui <- fluidPage(
       uiOutput("predictor_vars_ui")
     ),
     mainPanel(
+      h3("Multiple Linear Regression Plot"),
       plotOutput("regression_plot"),
-      tableOutput("regression_metrics_table"),
-      tableOutput("regression_coefs_table"),
-      plotOutput("ggpairs_plot"),
+      
+      h3("Dataset Summary"),
       verbatimTextOutput("data_summary"),
+      
+      h3("GGpairs Plot"),
+      plotOutput("ggpairs_plot"),
+      
+      h3("Regression Model Metrics"),
+      tableOutput("regression_metrics_table"),
+      
+      h3("Regression Model Coefficients"),
+      tableOutput("regression_coefs_table"),
+      
     )
   )
 )
