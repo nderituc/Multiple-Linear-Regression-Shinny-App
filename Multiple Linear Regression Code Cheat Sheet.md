@@ -4,7 +4,8 @@ Load the required R library stats, which contains the lm() function (linear mode
 ```
 #R code
 # Load the necessary libraries
-library(stats)   # For lm() function
+library(tidyverse)
+library(tidymodels)   
 ```
 ## Data Preparation
 Load your dataset (in CSV format) and split it into predictor variables (X) and the response variable (Y). Replace "data.csv" with your actual data file. Use str(data) to examine the structure of the dataset.
