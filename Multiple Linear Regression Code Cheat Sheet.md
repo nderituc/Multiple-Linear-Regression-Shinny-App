@@ -1,6 +1,5 @@
 # Multiple Linear Regression Code Cheat Sheet
 ## Load Required Libraries
-Load the required R library stats, which contains the lm() function (linear model), used for fitting the multiple linear regression model.
 ```
 #R code
 # Load the necessary libraries
