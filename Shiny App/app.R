@@ -7,7 +7,7 @@ library(GGally)
 library(plotly)
 
 ui <- fluidPage(
-  titlePanel("Multiple Linear Regression App"),
+  titlePanel("Multiple Linear Regression"),
   
   sidebarLayout(
     sidebarPanel(
