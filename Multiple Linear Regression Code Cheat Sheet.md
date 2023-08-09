@@ -21,6 +21,14 @@ str(data)
 X <- data[, c("x1", "x2", "x3")]  # Select predictor variables
 Y <- data$y                       # Select response variable
 ```
+## Data Exploration
+```
+#R code
+#Obtain graphical and numerical summaries to describe the pairwise relationships.
+data %>% 
+  select(Y, x1, x2,x3) %>% 
+  ggpairs()
+```
 ## Fit Multiple Linear Regression Model
 Creating a Linear Regression Model Specification: Create a model specification using the linear_reg() function from the parsnip package. A model specification defines the type of model you want to create and specifies its settings. Here, you are specifying a linear regression model for regression analysis.
 
