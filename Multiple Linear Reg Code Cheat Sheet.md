@@ -1,5 +1,5 @@
 # Multiple Linear Regression Code Cheat Sheet
-[Download pdf](https://github.com/nderituc/Multiple-Linear-Regression-Shinny-App/blob/main/MLR%20Cheat%20Sheet.pdf)
+[Download pdf](https://github.com/nderituc/Portfolio-STA-631/blob/main/Shiny%20App/MLR%20Cheat%20Sheet.pdf)
 ## Load Required Libraries
 ```
 #R code
