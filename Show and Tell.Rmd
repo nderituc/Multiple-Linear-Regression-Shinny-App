@@ -1,6 +1,7 @@
+# Catherine Nderitu
 # Portfolio Goal Setting:
 
-For my portfolio, I have chosen to create an interactive applet that explains a supervised statistical learning method using real-world data. The applet focuses on linear regression, one of the foundational concepts of statistical modeling. It allows users to upload their own dataset or use a pre-loaded dataset to visualize how linear regression works. Users can interactively adjust the model parameters, see the corresponding changes in the fitted line, and explore the statistical measures like R-squared and residual plots. This applet was developed using the R programming language and the Shiny package.
+For my portfolio, I chose to create an interactive applet that explains a supervised statistical learning method using real-world data. The applet focuses on linear regression, one of the foundational concepts of statistical modeling. It allows users to upload their own dataset or use a pre-loaded dataset to visualize how linear regression works. Users can interactively adjust the model parameters, see the corresponding changes in the fitted line, and explore the statistical measures like R-squared and residual plots. This applet was developed using the R programming language and the Shiny package.
 
 # Course Objectives
 
@@ -39,7 +40,7 @@ tidy(mlr_mod)
 
 ```
 
-To assess our model fit, we can use $R^2$ (the coefficient of determination), the proportion of variability in the response variable that is explained by the explanatory variable.With R-squared of 0.84 it means that, approximately 84% of the variability in the dependent variable mpg can be explained by the independent variables wt
+To assess our model fit, we can use $R^2$ (the coefficient of determination), the proportion of variability in the response variable that is explained by the explanatory variable.With R-squared of 0.84 it means that, approximately 84% of the variability in the dependent variable mpg can be explained by the independent variable wt
 
 ```{r}
 glance(mlr_mod)
@@ -49,13 +50,12 @@ glance(mlr_mod)
 
 ### Logistic Regresion GLM
 
-This example uses the "Default" dataset to perform a logistic regression analysis. The objective is to predict the likelihood of default (binary outcome) based on the predictor variables: "student," "balance," and "income." The code first loads the necessary libraries and displays a summary of the dataset.
+In this example I used the "Default" dataset to perform a logistic regression analysis. The objective was to predict the likelihood of default (binary outcome) based on the predictor variables: "student," "balance," and "income." I first loaded the necessary libraries and displayed a summary of the dataset.
 
-After that, it fits a multiple logistic regression model using the "glm" function from the "tidyverse" package. The results are then presented, showing the coefficients and their statistics. To make the interpretation easier, the exponentiated coefficients are also displayed.
+I then fitted a multiple logistic regression model using the "glm" function from the "tidyverse" package.
+I created two plots to assess the model's fit. The first plot shows the deviance residuals against the fitted values, helping to visualize the distribution of residuals and identify any patterns or trends. The second plot displays the deviance residuals against the row numbers,in order to detect potential outliers or influential observations.
 
-Next, the code creates two plots to assess the model's fit. The first plot shows the deviance residuals against the fitted values, helping us visualize the distribution of residuals and identify any patterns or trends. The second plot displays the deviance residuals against the row numbers, allowing us to detect potential outliers or influential observations.
-
-Overall, this code provides a comprehensive analysis of the logistic regression model a member of generalized linear models, from fitting the model to evaluating its fit using residual plots. It helps understand how the predictor variables contribute to the likelihood of default in the "Default" dataset.
+Overall, this example provided a comprehensive analysis of the logistic regression model a member of generalized linear models, from fitting the model to evaluating its fit using residual plots. It helped understand how the predictor variables contribute to the likelihood of default in the "Default" dataset.
 
 ```{r}
 # Load necessary libraries
@@ -111,7 +111,7 @@ labs(x = "id",
 
 ### Subset selection method
 
-This example below performs best subsets regression on the "mtcars" dataset to find the best model with the optimal number of predictor variables. It explores different metrics, such as R-squared, Adjusted R-squared, Cp, and BIC, to evaluate the performance of models with varying numbers of predictors. The code generates plots to visualize the relationships between these metrics and the number of variables in the model. Ultimately, it identifies the model with the highest Adjusted R-squared and the model with the minimum Cp and BIC values. Additionally, it retrieves the coefficients of the model with 6 variables, providing insights into the significant predictors for that model.
+In the  example below I performed best subsets regression on the "mtcars" dataset to find the best model with the optimal number of predictor variables.I explored different metrics, such as R-squared, Adjusted R-squared, Cp, and BIC, to evaluate the performance of models with varying numbers of predictors.I code generated plots to visualize the relationships between these metrics and the number of variables in the model. Ultimately,I identified the model with the highest Adjusted R-squared and the model with the minimum Cp and BIC values. Additionally, I retrieved the coefficients of the model with 6 variables, providing insights into the significant predictors for that model.
 
 ```{r}
 # Load required libraries
@@ -178,13 +178,13 @@ ylab = " Adjusted RSq ", type = "l")
 
 ### Forward and backward selection
 
-This following example performs forward stepwise regression and backward stepwise regression using best subsets on the "mtcars" dataset with the response variable "mpg" and predictor variables from the dataset. The regsubsets function from the "leaps" package is used to perform the best subsets regression.
+In this example I performed forward stepwise regression and backward stepwise regression using best subsets on the "mtcars" dataset with the response variable "mpg" and predictor variables from the dataset.I used regsubsets function from the "leaps" package to perform the best subsets regression.
 
-After fitting the forward and backward stepwise regression models, the code then uses the summary function to view the results, which include information about the selected variables and their coefficients for each model with different numbers of variables (up to 19).
+After fitting the forward and backward stepwise regression models, I used the summary function to view the results, which include information about the selected variables and their coefficients for each model with different numbers of variables (up to 19).
 
-Finally, the code retrieves the coefficients of the model with 7 variables from the full model, the forward stepwise model, and the backward stepwise model, respectively.
+I then retrieved the coefficients of the model with 7 variables from the full model, the forward stepwise model, and the backward stepwise model, respectively.
 
-In summary, this code conducts model selection by exploring different combinations of predictor variables and provides insights into the best models with a specific number of variables, helping to identify the most relevant predictors for explaining the variation in the "mpg" response variable.
+In summary, conducted model selection by exploring different combinations of predictor variables and provided insights into the best models with a specific number of variables, helping to identify the most relevant predictors for explaining the variation in the "mpg" response variable.
 
 ```{r}
 # Perform forward stepwise regression using best subsets

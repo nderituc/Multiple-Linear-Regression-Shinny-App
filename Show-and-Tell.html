@@ -354,7 +354,7 @@ display: none;
 
 <div id="portfolio-goal-setting" class="section level1">
 <h1>Portfolio Goal Setting:</h1>
-<p>For my portfolio, I have chosen to create an interactive applet that
+<p>For my portfolio, I chose to create an interactive applet that
 explains a supervised statistical learning method using real-world data.
 The applet focuses on linear regression, one of the foundational
 concepts of statistical modeling. It allows users to upload their own
@@ -411,7 +411,7 @@ library(GGally)</code></pre>
 ## ✖ dplyr::lag()      masks stats::lag()
 ## ✖ yardstick::spec() masks readr::spec()
 ## ✖ recipes::step()   masks stats::step()
-## • Use suppressPackageStartupMessages() to eliminate package startup messages</code></pre>
+## • Learn how to get started at https://www.tidymodels.org/start/</code></pre>
 <pre class="r"><code>#plots to check the relationship between response and predictor variables
 mtcars %&gt;% 
   select(mpg,wt,hp,qsec,cyl,disp,drat) %&gt;% 
@@ -451,7 +451,7 @@ tidy(mlr_mod)</code></pre>
 the proportion of variability in the response variable that is explained
 by the explanatory variable.With R-squared of 0.84 it means that,
 approximately 84% of the variability in the dependent variable mpg can
-be explained by the independent variables wt</p>
+be explained by the independent variable wt</p>
 <pre class="r"><code>glance(mlr_mod)</code></pre>
 <pre><code>## # A tibble: 1 × 12
 ##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
@@ -464,27 +464,23 @@ be explained by the independent variables wt</p>
 generalized linear model for a specific data context</h2>
 <div id="logistic-regresion-glm" class="section level3">
 <h3>Logistic Regresion GLM</h3>
-<p>This example uses the “Default” dataset to perform a logistic
-regression analysis. The objective is to predict the likelihood of
+<p>In this example I used the “Default” dataset to perform a logistic
+regression analysis. The objective was to predict the likelihood of
 default (binary outcome) based on the predictor variables: “student,”
-“balance,” and “income.” The code first loads the necessary libraries
-and displays a summary of the dataset.</p>
-<p>After that, it fits a multiple logistic regression model using the
-“glm” function from the “tidyverse” package. The results are then
-presented, showing the coefficients and their statistics. To make the
-interpretation easier, the exponentiated coefficients are also
-displayed.</p>
-<p>Next, the code creates two plots to assess the model’s fit. The first
-plot shows the deviance residuals against the fitted values, helping us
-visualize the distribution of residuals and identify any patterns or
-trends. The second plot displays the deviance residuals against the row
-numbers, allowing us to detect potential outliers or influential
-observations.</p>
-<p>Overall, this code provides a comprehensive analysis of the logistic
-regression model a member of generalized linear models, from fitting the
-model to evaluating its fit using residual plots. It helps understand
-how the predictor variables contribute to the likelihood of default in
-the “Default” dataset.</p>
+“balance,” and “income.” I first loaded the necessary libraries and
+displayed a summary of the dataset.</p>
+<p>I then fitted a multiple logistic regression model using the “glm”
+function from the “tidyverse” package. I created two plots to assess the
+model’s fit. The first plot shows the deviance residuals against the
+fitted values, helping to visualize the distribution of residuals and
+identify any patterns or trends. The second plot displays the deviance
+residuals against the row numbers,in order to detect potential outliers
+or influential observations.</p>
+<p>Overall, this example provided a comprehensive analysis of the
+logistic regression model a member of generalized linear models, from
+fitting the model to evaluating its fit using residual plots. It helped
+understand how the predictor variables contribute to the likelihood of
+default in the “Default” dataset.</p>
 <pre class="r"><code># Load necessary libraries
 library(ISLR2)       # For accessing the &quot;Default&quot; dataset
 library(tidyverse)   # For data manipulation and visualization
@@ -591,15 +587,15 @@ labs(x = &quot;id&quot;,
 candidate models</h2>
 <div id="subset-selection-method" class="section level3">
 <h3>Subset selection method</h3>
-<p>This example below performs best subsets regression on the “mtcars”
-dataset to find the best model with the optimal number of predictor
-variables. It explores different metrics, such as R-squared, Adjusted
-R-squared, Cp, and BIC, to evaluate the performance of models with
-varying numbers of predictors. The code generates plots to visualize the
-relationships between these metrics and the number of variables in the
-model. Ultimately, it identifies the model with the highest Adjusted
+<p>In the example below I performed best subsets regression on the
+“mtcars” dataset to find the best model with the optimal number of
+predictor variables.I explored different metrics, such as R-squared,
+Adjusted R-squared, Cp, and BIC, to evaluate the performance of models
+with varying numbers of predictors.I code generated plots to visualize
+the relationships between these metrics and the number of variables in
+the model. Ultimately,I identified the model with the highest Adjusted
 R-squared and the model with the minimum Cp and BIC values.
-Additionally, it retrieves the coefficients of the model with 6
+Additionally, I retrieved the coefficients of the model with 6
 variables, providing insights into the significant predictors for that
 model.</p>
 <pre class="r"><code># Load required libraries
@@ -672,20 +668,20 @@ ylab = &quot; Adjusted RSq &quot;, type = &quot;l&quot;)</code></pre>
 </div>
 <div id="forward-and-backward-selection" class="section level3">
 <h3>Forward and backward selection</h3>
-<p>This following example performs forward stepwise regression and
-backward stepwise regression using best subsets on the “mtcars” dataset
-with the response variable “mpg” and predictor variables from the
-dataset. The regsubsets function from the “leaps” package is used to
-perform the best subsets regression.</p>
-<p>After fitting the forward and backward stepwise regression models,
-the code then uses the summary function to view the results, which
-include information about the selected variables and their coefficients
-for each model with different numbers of variables (up to 19).</p>
-<p>Finally, the code retrieves the coefficients of the model with 7
-variables from the full model, the forward stepwise model, and the
-backward stepwise model, respectively.</p>
-<p>In summary, this code conducts model selection by exploring different
-combinations of predictor variables and provides insights into the best
+<p>In this example I performed forward stepwise regression and backward
+stepwise regression using best subsets on the “mtcars” dataset with the
+response variable “mpg” and predictor variables from the dataset.I used
+regsubsets function from the “leaps” package to perform the best subsets
+regression.</p>
+<p>After fitting the forward and backward stepwise regression models, I
+used the summary function to view the results, which include information
+about the selected variables and their coefficients for each model with
+different numbers of variables (up to 19).</p>
+<p>I then retrieved the coefficients of the model with 7 variables from
+the full model, the forward stepwise model, and the backward stepwise
+model, respectively.</p>
+<p>In summary, conducted model selection by exploring different
+combinations of predictor variables and provided insights into the best
 models with a specific number of variables, helping to identify the most
 relevant predictors for explaining the variation in the “mpg” response
 variable.</p>
